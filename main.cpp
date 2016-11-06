@@ -23,8 +23,9 @@ double distPointCont(double a, double x, double y, int WhereP);
 void outPoint(double x, double y);
 void outCont(double a);
 double distPointPoint(double x1, double y1, pair < double, double > p);
-double distPointSide(double x, double y, double a, double b, double c);
+double distPointSide(pair < double, double > p1, pair < double, double > p2, double a, int i);
 void coordinates(pair < double, double > p[7][3], pair < double, double > p1[8], pair < double, double > coord[8], double a, double x, double y);
+double det(pair < double, double > p1, pair < double, double > p2); // Вычисление определителя
 
 int main()
 {
@@ -86,11 +87,8 @@ int wherePoint(double x, double y, double a)
 
     if (sum == 6) return -1;
     if (!flag) return 1;
-    if (flag)
-    {
-        if (sum == 5 || sum == 4) return 0;
-        else return 1;
-    }
+    if (sum == 5 || sum == 4) return 0;
+    else return 1;
 }
 
 void outResults(double x, double y, double a, int WhereP, double dist)
@@ -118,6 +116,7 @@ void outResults(double x, double y, double a, int WhereP, double dist)
     cout << "DISTANCE=" << dist << endl;
 }
 
+
 int determinant(pair < double, double > p1, pair < double, double > p2) // Определение знака определителя
 {
     double product = p1.first * p2.second - p2.first * p1.second;
@@ -125,12 +124,17 @@ int determinant(pair < double, double > p1, pair < double, double > p2) // Оп�
     return product < 0 ? -1 : 1;
 }
 
+double det(pair < double, double > p1, pair < double, double > p2) // Вычисление определителя
+{
+    double product = p1.first * p2.second - p2.first * p1.second;
+    return fabs(product);
+}
+
 int scalar_product(pair < double, double > p1, pair < double, double > p2)
 {
     double result;
     result = p1.first * p2.first + p1.second * p2.second;
-    if (result >= 0) return 1;
-    else return -1;
+    return result >= 0 ? 1 : -1;
 }
 
 double distPointCont(double a, double x, double y, int WhereP)
@@ -143,32 +147,6 @@ double distPointCont(double a, double x, double y, int WhereP)
 
     coordinates(p, p1, coord, a, x, y);
 
-    double func[7][4];
-    func[1][1] = 0;
-    func[1][2] = 1;
-    func[1][3] = 0;
-
-    func[2][1] = 1;
-    func[2][2] = 0;
-    func[2][3] = -2*a;
-
-    func[3][1] = 1;
-    func[3][2] = 1;
-    func[3][3] = -3*a;
-
-    func[4][1] = 0;
-    func[4][2] = 1;
-    func[4][3] = -2*a;
-
-    func[5][1] = 1;
-    func[5][2] = 0;
-    func[5][3] = 0;
-
-    func[6][1] = 1;
-    func[6][2] = 1;
-    func[6][3] = -a;
-
-
     double dist[8];
     double dist1 = 0;
 
@@ -178,7 +156,7 @@ double distPointCont(double a, double x, double y, int WhereP)
         if ((scalar_product(p1[i], p[i][1]) == 1) &&
                 (scalar_product(p1[i+1], p[i][2]) == 1))
         {
-            dist[i] = distPointSide(x, y, func[i][1], func[i][2], func[i][3]);
+            dist[i] = distPointSide(p[i][1], p1[i], a, i);
         }
 
         else
@@ -206,9 +184,12 @@ double distPointPoint(double x1, double y1, pair < double, double > p)
     return sqrt( ((p.first - x1) * (p.first - x1)) + ((p.second - y1) * (p.second - y1)) );
 }
 
-double distPointSide(double x, double y, double a, double b, double c)
+double distPointSide(pair < double, double > p1, pair < double, double > p2, double a, int i)
 {
-    return fabs(a * x + b * y + c)/sqrt(a * a + b * b);
+    double b[3];
+    b[1] = a;
+    b[2] = a * sqrt(2);
+    return i % 3 == 0 ? det(p1, p2) / b[2] : det(p1, p2) / b[1];
 }
 
 void coordinates(pair < double, double > p[7][3], pair < double, double > p1[8], pair < double, double > coord[8], double a, double x, double y)
